@@ -5,13 +5,14 @@
 //
 // Execute `rustlings hint if2` or use the `hint` watch subcommand for a hint.
 
-// I AM NOT DONE
 
 pub fn foo_if_fizz(fizzish: &str) -> &str {
     if fizzish == "fizz" {
         "foo"
-    } else {
-        1
+    } else if fizzish == "fuzz" { // 添加一个条件来处理 "fuzz" 的情况
+        "bar"
+    } else { // 添加一个默认情况来处理其他情况
+        "baz"
     }
 }
 
