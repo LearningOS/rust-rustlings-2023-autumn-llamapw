@@ -42,6 +42,8 @@ mod Foo {
 }
 
 #[cfg(test)]
+#[no_mangle]
+#[export_name = "name"]
 mod tests {
     use super::*;
 
