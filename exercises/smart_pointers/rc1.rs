@@ -10,7 +10,14 @@
 //
 // Execute `rustlings hint rc1` or use the `hint` watch subcommand for a hint.
 
-// I AM NOT DONE
+
+// rc1.rs
+//
+// 在这个练习中，我们想要通过Rc<T>类型来表达多个所有者的概念。这是我们太阳系的一个模型 - 有一个Sun类型和多个Planets。Planets拥有太阳，表示它们绕着太阳运转。
+//
+// 通过使用适当的Rc原语使这段代码能够编译，以表达太阳具有多个所有者。
+//
+// 执行 rustlings hint rc1 或使用 hint watch 子命令来获得提示。
 
 use std::rc::Rc;
 
@@ -60,17 +67,17 @@ fn main() {
     jupiter.details();
 
     // TODO
-    let saturn = Planet::Saturn(Rc::new(Sun {}));
+    let saturn = Planet::Saturn(Rc::clone(&sun));
     println!("reference count = {}", Rc::strong_count(&sun)); // 7 references
     saturn.details();
 
     // TODO
-    let uranus = Planet::Uranus(Rc::new(Sun {}));
+    let uranus = Planet::Uranus(Rc::clone(&sun));
     println!("reference count = {}", Rc::strong_count(&sun)); // 8 references
     uranus.details();
 
     // TODO
-    let neptune = Planet::Neptune(Rc::new(Sun {}));
+    let neptune = Planet::Neptune(Rc::clone(&sun));
     println!("reference count = {}", Rc::strong_count(&sun)); // 9 references
     neptune.details();
 
@@ -92,12 +99,15 @@ fn main() {
     println!("reference count = {}", Rc::strong_count(&sun)); // 4 references
 
     // TODO
+    drop(earth);
     println!("reference count = {}", Rc::strong_count(&sun)); // 3 references
 
     // TODO
+    drop(venus);
     println!("reference count = {}", Rc::strong_count(&sun)); // 2 references
 
     // TODO
+    drop(mercury);
     println!("reference count = {}", Rc::strong_count(&sun)); // 1 reference
 
     assert_eq!(Rc::strong_count(&sun), 1);

@@ -8,7 +8,13 @@
 // Execute `rustlings hint threads1` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
+
+// threads1.rs
+//
+// 这个程序启动多个线程，每个线程运行至少250毫秒，然后每个线程返回它们完成的时间。程序应该等待所有已启动的线程完成，并将它们的返回值收集到一个向量中。
+//
+// 执行 rustlings hint threads1 或使用 hint watch 子命令来获取提示。
+
 
 use std::thread;
 use std::time::{Duration, Instant};
@@ -27,6 +33,7 @@ fn main() {
     let mut results: Vec<u128> = vec![];
     for handle in handles {
         // TODO: a struct is returned from thread::spawn, can you use it?
+        results.push(handle.join().unwrap()); // 使用 join 方法等待线程完成并获取返回值
     }
 
     if results.len() != 10 {
