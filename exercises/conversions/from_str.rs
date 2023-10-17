@@ -9,16 +9,9 @@
 // Execute `rustlings hint from_str` or use the `hint` watch subcommand for a
 // hint.
 
-use std::num::ParseIntError;
 use std::str::FromStr;
+use std::num::ParseIntError;
 
-#[derive(Debug, PartialEq)]
-struct Person {
-    name: String,
-    age: usize,
-}
-
-// We will use this error type for the `FromStr` implementation.
 #[derive(Debug, PartialEq)]
 enum ParsePersonError {
     // Empty input string
@@ -31,29 +24,68 @@ enum ParsePersonError {
     ParseInt(ParseIntError),
 }
 
-// I AM NOT DONE
+impl std::fmt::Display for ParsePersonError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            ParsePersonError::Empty => write!(f, "Empty input string"),
+            ParsePersonError::BadLen => write!(f, "Incorrect number of fields"),
+            ParsePersonError::NoName => write!(f, "Empty name field"),
+            ParsePersonError::ParseInt(e) => write!(f, "Error parsing age: {}", e),
+        }
+    }
+}
 
-// Steps:
-// 1. If the length of the provided string is 0, an error should be returned
-// 2. Split the given string on the commas present in it
-// 3. Only 2 elements should be returned from the split, otherwise return an
-//    error
-// 4. Extract the first element from the split operation and use it as the name
-// 5. Extract the other element from the split operation and parse it into a
-//    `usize` as the age with something like `"4".parse::<usize>()`
-// 6. If while extracting the name and the age something goes wrong, an error
-//    should be returned
-// If everything goes well, then return a Result of a Person object
-//
-// As an aside: `Box<dyn Error>` implements `From<&'_ str>`. This means that if
-// you want to return a string error message, you can do so via just using
-// return `Err("my error message".into())`.
+impl std::error::Error for ParsePersonError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            ParsePersonError::ParseInt(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+struct Person {
+    name: String,
+    age: usize,
+}
 
 impl FromStr for Person {
     type Err = ParsePersonError;
+
     fn from_str(s: &str) -> Result<Person, Self::Err> {
+        // 1. If the length of the provided string is 0, an error should be returned
+        if s.is_empty() {
+            return Err(ParsePersonError::Empty);
+        }
+
+        // 2. Split the given string on the commas present in it
+        let parts: Vec<&str> = s.split(',').collect();
+
+        // 3. Only 2 elements should be returned from the split, otherwise return an error
+        if parts.len() != 2 {
+            return Err(ParsePersonError::BadLen);
+        }
+
+        let name = parts[0];
+        let age_str = parts[1];
+
+        // 4. Extract the first element from the split operation and use it as the name
+        // 5. Extract the other element from the split operation and parse it into a `usize` as the age
+        let age = age_str.parse::<usize>().map_err(ParsePersonError::ParseInt)?;
+
+        // 6. If while extracting the name and the age something goes wrong, an error should be returned
+        if name.is_empty() {
+            return Err(ParsePersonError::NoName);
+        }
+
+        Ok(Person {
+            name: name.to_string(),
+            age,
+        })
     }
 }
+
 
 fn main() {
     let p = "Mark,20".parse::<Person>().unwrap();
