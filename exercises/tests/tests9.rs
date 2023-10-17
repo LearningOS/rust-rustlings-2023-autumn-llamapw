@@ -27,27 +27,46 @@
 //
 // You should NOT modify any existing code except for adding two lines of attributes.
 
+// tests9.rs
+//
+// Rust非常擅长与C/C++和其他静态编译语言共享FFI接口，甚至可以在代码内部进行链接！它通过`extern`块来实现，就像下面的代码一样。
+//
+// `extern`关键字后面的短字符串指示外部导入函数将遵循的ABI。在这个练习中，使用"Rust"，而其他变种如标准C ABI的"C"，Windows ABI的"stdcall"也存在。
+//
+// 外部导入函数在`extern`块中声明，用分号标记签名的结尾，而不是用花括号。可以对这些函数声明应用一些属性，以修改链接行为，比如使用#[link_name = ".."]来修改实际的符号名称。
+//
+// 如果要将符号导出到链接环境，还可以在函数定义前使用相同的ABI字符串注释标记`extern`关键字。Rust函数的默认ABI实际上是"Rust"，因此如果要链接到纯Rust函数，可以省略整个`extern`术语。
+//
+// Rust默认情况下对符号进行名称重整（mangling），就像C++一样。为了抑制此行为并使这些函数能够通过名称寻址，可以应用属性#[no_mangle]。
+//
+// 在这个练习中，你的任务是使测试用例能够调用模块Foo中的`my_demo_function`。`my_demo_function_alias`是`my_demo_function`的别名，因此测试用例中的两行代码应该调用相同的函数。
+//
+// 除了添加两行属性之外，不应修改任何现有代码。
 
 
-extern "Rust" {
+extern "Rust"  {
     fn my_demo_function(a: u32) -> u32;
+
+    #[link_name = "my_demo_function"]
     fn my_demo_function_alias(a: u32) -> u32;
 }
 
 mod Foo {
     // No `extern` equals `extern "Rust"`.
-    fn my_demo_function(a: u32) -> u32 {
+    #[no_mangle]
+     fn my_demo_function(a: u32) -> u32 {
         a
     }
 }
 
 #[cfg(test)]
-#[no_mangle]
-#[export_name = "name"]
+
 mod tests {
     use super::*;
 
     #[test]
+    #[no_mangle]
+    #[export_name = "name"]
     fn test_success() {
         // The externally imported functions are UNSAFE by default
         // because of untrusted source of other languages. You may
@@ -55,6 +74,12 @@ mod tests {
         //
         // SAFETY: We know those functions are aliases of a safe
         // Rust function.
+        // 外部导入的函数默认情况下是不安全的
+        // 因为它们来自不受信任的其他语言的源。你可以
+        // 将它们封装在安全的Rust API中，以减轻调用者的负担。
+        //
+        // 安全性：我们知道这些函数是安全的Rust函数的别名。
+
         unsafe {
             my_demo_function(123);
             my_demo_function_alias(456);
